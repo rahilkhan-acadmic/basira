@@ -1,0 +1,43 @@
+name: deploy-dev
+
+# Manual only. Runs in the GitHub Environment "dev", which the AWS role trusts
+# (repo:<owner>/basira:environment:dev). Add required reviewers on that Environment
+# to get a manual approval step. Paper/live deploys get their own workflows later;
+# live deploys only from tagged releases with manual approval (spec Section 16).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # OIDC token for AWS, no stored keys
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install
+        run: |
+          pip install -r infra/requirements.txt
+          npm install -g aws-cdk@2.1146.1
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-south-1
+      - name: Diff
+        working-directory: infra
+        run: cdk diff --all -c env=dev -c github_owner=${{ github.repository_owner }} -c alert_email=${{ vars.ALERT_EMAIL }}
+      - name: Deploy
+        working-directory: infra
+        run: cdk deploy --all -c env=dev -c github_owner=${{ github.repository_owner }} -c alert_email=${{ vars.ALERT_EMAIL }} --require-approval never

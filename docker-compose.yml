@@ -1,0 +1,37 @@
+# Local development stack (M0). Matches the AWS versions in infra/ (PostgreSQL 16 + pgvector, Redis 7).
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: basira-postgres
+    environment:
+      POSTGRES_DB: basira
+      POSTGRES_USER: basira
+      POSTGRES_PASSWORD: basira_local_only   # local only; real secrets live in AWS Secrets Manager
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U basira -d basira"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: basira-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  redisdata:
