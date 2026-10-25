@@ -1,0 +1,59 @@
+[project]
+name = "basira"
+version = "0.0.1"
+description = "Basira — AI-assisted investment and trading desk for NSE equities and stock options (paper-first)."
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pytest>=8.0",
+    "pre-commit>=3.7",
+    "types-PyYAML",
+]
+infra = [
+    "aws-cdk-lib>=2.170.0,<3",
+    "constructs>=10.0.0,<11",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = [
+    "core*", "marketdata*", "pricing*", "books*", "tools*", "agents*", "control*",
+    "execution*", "accounting*", "memory*", "knowledge*", "evaluation*", "replay*", "api*",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["ui", "infra/cdk.out"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "N", "SIM", "RUF"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+"infra/tests/**" = ["S101"]
+"infra/basira_infra/**" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+exclude = ["ui/", "infra/cdk.out/"]
+
+[[tool.mypy.overrides]]
+module = ["aws_cdk.*", "constructs.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "infra/tests"]
+addopts = "-q"
