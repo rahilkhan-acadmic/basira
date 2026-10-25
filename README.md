@@ -13,6 +13,8 @@ gate in spec Section 2.
 
 ## Status
 
+Start here: [docs/handoff.md](docs/handoff.md)
+
 Milestone **M0 (repo scaffold)** plus the **AWS foundation** for `dev` (`infra/`).
 See `docs/aws-setup.md` for the AWS runbook and `docs/limitations.md` for what is not built yet.
 
