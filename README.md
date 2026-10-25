@@ -39,7 +39,7 @@ ruff check . && mypy core && pytest
 
 ```bash
 npm install -g aws-cdk@2.1146.1
-cd infra && cdk synth -c env=dev -c github_owner=<github-user>
+cd infra && cdk synth -c env=dev -c github_owner=rahilkhan-acadmic
 ```
 
 Deploying costs money; see the cost table in `docs/aws-setup.md` and get the Owner's approval first.

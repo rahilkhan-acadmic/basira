@@ -5,6 +5,7 @@
     "exclude": ["README.md", "cdk*.json", "tests", "**/__pycache__"]
   },
   "context": {
+    "github_owner": "rahilkhan-acadmic",
     "github_repo": "basira",
     "@aws-cdk/aws-iam:minimizePolicies": true,
     "@aws-cdk/core:validateSnapshotRemovalPolicy": true,

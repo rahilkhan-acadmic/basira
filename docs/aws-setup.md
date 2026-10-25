@@ -56,8 +56,8 @@ stack gets the `Basira-<Env>-Boundary` permissions boundary.
 ```bash
 pip install -r infra/requirements.txt && npm install -g aws-cdk@2.1146.1
 cd infra
-cdk diff   --all -c env=dev -c github_owner=<github-user> -c alert_email=<email>
-cdk deploy --all -c env=dev -c github_owner=<github-user> -c alert_email=<email>
+cdk diff   --all -c env=dev -c github_owner=rahilkhan-acadmic -c alert_email=<email>
+cdk deploy --all -c env=dev -c github_owner=rahilkhan-acadmic -c alert_email=<email>
 ```
 
 First deploy is run with the `basira-deployer` key. Afterwards, set GitHub Environment `dev`
