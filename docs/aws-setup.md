@@ -3,7 +3,7 @@
 How the Basira AWS estate is organised, what was set up by hand, and how to deploy.
 
 Last updated: 2026-11-01 (merged the 2026-10-27 bootstrap and first-deploy updates from the old
-Cowork project doc `claude/aws-setup-runbook.md`).
+Cowork project doc `claude/aws-setup-runbook.md`; recorded the `basira-deployer` access key for Claude Code).
 
 ## Current state (dev)
 
@@ -11,7 +11,9 @@ Cowork project doc `claude/aws-setup-runbook.md`).
 - Deployed on 2026-10-27: `Basira-Dev-Security` and `Basira-Dev-Auth` (KMS key, permissions boundary,
   placeholder secrets, Cognito pool with 4 groups), ~$3/month.
 - Not deployed: Network, Data, Compute, Observability, Cicd (planned for M19).
-- No long-lived AWS access keys exist. Deploys run from Simurgh CloudShell with temporary portal credentials.
+- One long-lived access key exists: `basira-deployer`, created on purpose by the Owner (by 2026-11-01) and stored
+  only in the Claude Code cloud environment for this repo, so deploys can run from Claude Code sessions.
+  Simurgh CloudShell with temporary portal credentials remains the fallback.
 
 ## Organisation
 
@@ -45,13 +47,18 @@ Root (r-zt6m)                         Organization o-c23i8bhbc6
       qualifier `hnb659fds`, default AdministratorAccess execution policy). Run from **Simurgh CloudShell** using
       temporary `BasiraAdmin` credentials for basira-dev from the access portal ("Access keys" → export lines).
 - [x] IAM user `basira-deployer` with `BasiraDeployerPolicy` (assume `cdk-hnb659fds-*` only) attached
-- [x] Decision: **no access key** for `basira-deployer`; deploys run from Simurgh CloudShell with temporary portal credentials until the Cicd stack exists (M19)
+- [x] ~~Decision: no access key for `basira-deployer`~~ (2026-10-27), superseded by 2026-11-01 decision below
+- [x] 2026-11-01: Decision: `basira-deployer` **has an access key**, kept only in the Claude Code cloud environment
+      settings (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION=ap-south-1`), so Claude Code
+      sessions can run `cdk diff` / `cdk deploy`. See "Deploying from a Claude Code session".
+- [ ] Rotate the `basira-deployer` key every 90 days (create new key, update the environment, then delete the old one);
+      delete it once the Cicd stack's OIDC role replaces it (M19)
 - [x] 2026-10-27: first deploy = **Security + Auth only** (`Basira-Dev-Security`, `Basira-Dev-Auth`: CREATE_COMPLETE).
       Network/Data/Compute/Observability/Cicd wait until M19. The `deploy-dev` GitHub workflow needs the Cicd stack, so it is unusable until then.
 - GitHub OIDC provider: none existed on 2026-10-27; the Cicd stack creates it.
 - [ ] Set real values for the placeholder secrets `basira/dev/*` when providers are chosen (currently random placeholder values)
 - [ ] Backup budget in Simurgh filtered to linked account basira-dev (after first charges appear)
-- [ ] Budget action on Actual 100% denying resource creation for `basira-deployer`
+- [ ] Budget action on Actual 100% denying resource creation for `basira-deployer` (higher priority now that it has a key)
 
 ## Stacks (`infra/`)
 
@@ -94,6 +101,20 @@ deactivate; cd ~; rm -rf basira /tmp/cdkvenv
 
 Use `npx aws-cdk@2.1146.1`, not CloudShell's preinstalled `cdk`, so the CLI matches `aws-cdk-lib` in the repo.
 
+## Deploying from a Claude Code session
+
+The Claude Code cloud environment for this repo holds the `basira-deployer` key. It is
+`arn:aws:iam::656253649756:user/basira-deployer` in basira-dev, and `BasiraDeployerPolicy` lets it only assume the CDK
+bootstrap roles (`cdk-hnb659fds-*`). It cannot read IAM or use other services directly, but the CDK deploy role runs
+CloudFormation with AdministratorAccess, so it can create, change or delete any stack in basira-dev.
+
+Rules for sessions:
+- Claude runs `cdk diff` freely, but `cdk deploy` or `cdk destroy` only after the Owner approves that specific run
+  (spend rule in the spec).
+- Check the identity first: `aws sts get-caller-identity` (or boto3) must show account `656253649756`.
+- Never print, log, commit or paste the key. It lives only in the environment settings.
+- Sessions have Node 22 and Python; use the pinned CLI: `npx -y aws-cdk@2.1146.1 ... -c env=dev`.
+
 ## Deploy
 
 ```bash
@@ -103,7 +124,7 @@ cdk diff   --all -c env=dev -c github_owner=rahilkhan-acadmic -c alert_email=<em
 cdk deploy --all -c env=dev -c github_owner=rahilkhan-acadmic -c alert_email=<email>
 ```
 
-Until the Cicd stack exists (M19), deploy from Simurgh CloudShell as above (no long-lived keys).
+Until the Cicd stack exists (M19), deploy from a Claude Code session or from Simurgh CloudShell as above.
 After it is deployed, set GitHub Environment `dev` variables `AWS_DEPLOY_ROLE_ARN` (stack output)
 and `ALERT_EMAIL`, and use the `deploy-dev` workflow.
 

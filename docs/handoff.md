@@ -20,8 +20,10 @@ Last updated: 2026-11-01
 - `main`: M0 scaffold and AWS foundation (`4c17a90`, `64aa33b`, restored from bundle in `6574745`), then
   docs-only commits: handoff, spec v10 and research import, AWS runbook update.
 - AWS `dev`: CDK-bootstrapped; `Basira-Dev-Security` and `Basira-Dev-Auth` deployed 2026-10-27 (~$3/month).
-  Network, Data, Compute, Observability and Cicd wait until M19. No long-lived access keys; deploys run from
-  Simurgh CloudShell with temporary portal credentials (details in `docs/aws-setup.md`).
+  Network, Data, Compute, Observability and Cicd wait until M19.
+- Claude Code sessions for this repo have AWS access: the environment holds an access key for
+  `basira-deployer` (added on purpose by the Owner). Deploys need the Owner's approval each time; Simurgh
+  CloudShell remains the fallback (details in `docs/aws-setup.md`).
 - Checks (2026-10-31): `ruff check .` clean; `python -m pytest` 14 passed (needs `pip install -e ".[dev]" -r infra/requirements.txt`;
   bare `pytest` fails to import `core` because the repo root is not on `sys.path`).
 
@@ -30,7 +32,8 @@ Last updated: 2026-11-01
 AWS (full list in `docs/aws-setup.md`):
 - [ ] Account verification for `basira-dev` (support case open; CloudShell in basira-dev blocked until done)
 - [x] 2026-10-27: `cdk bootstrap` (stack `CDKToolkit`, qualifier `hnb659fds`), run from Simurgh CloudShell
-- [x] IAM user `basira-deployer` with `BasiraDeployerPolicy`; decision: no access key until the Cicd stack (M19)
+- [x] IAM user `basira-deployer` with `BasiraDeployerPolicy`; 2026-11-01: access key added for Claude Code sessions
+- [ ] Rotate the `basira-deployer` key every 90 days; delete it when the Cicd OIDC role exists (M19)
 - [x] Deploy scope decided and done: Security + Auth only (2026-10-27); the rest at M19
 - [ ] Real values for placeholder secrets `basira/dev/*` when providers are chosen
 - [ ] Backup budget in Simurgh for basira-dev (after first charges); budget action on Actual 100%
@@ -70,3 +73,5 @@ Build:
   pointing to the repo (artifacts have no folders); kept for now.
 - 2026-11-01: `docs/aws-setup.md` brought up to date with the 2026-10-27 bootstrap and Security + Auth
   deploy from the old Cowork runbook. Decision recorded: no access key for `basira-deployer` until M19.
+- 2026-11-01: The no-access-key decision is reversed. `basira-deployer` has a long-lived key stored in the
+  Claude Code environment so sessions can deploy; each deploy still needs the Owner's approval.
