@@ -17,20 +17,24 @@ Last updated: 2026-11-01
 ## Current state
 
 - Milestone M0 (repo scaffold) plus the AWS foundation CDK app for `dev` (`infra/`) are written.
-- `main`: dummy README commit, then `4c17a90` (M0 scaffold and AWS foundation) and `64aa33b`
-  (GitHub owner for the OIDC deploy role), merged with unrelated histories (`6574745`).
-- Nothing is deployed to AWS yet.
+- `main`: M0 scaffold and AWS foundation (`4c17a90`, `64aa33b`, restored from bundle in `6574745`), then
+  docs-only commits: handoff, spec v10 and research import, AWS runbook update.
+- AWS `dev`: CDK-bootstrapped; `Basira-Dev-Security` and `Basira-Dev-Auth` deployed 2026-10-27 (~$3/month).
+  Network, Data, Compute, Observability and Cicd wait until M19. No long-lived access keys; deploys run from
+  Simurgh CloudShell with temporary portal credentials (details in `docs/aws-setup.md`).
 - Checks (2026-10-31): `ruff check .` clean; `python -m pytest` 14 passed (needs `pip install -e ".[dev]" -r infra/requirements.txt`;
   bare `pytest` fails to import `core` because the repo root is not on `sys.path`).
 
 ## Open items
 
-AWS:
-- [ ] Account verification for `basira-dev` (support case open; CloudShell blocked until done)
-- [ ] `cdk bootstrap aws://656253649756/ap-south-1 --tags Project=basira`
-- [ ] IAM user `basira-deployer` with `BasiraDeployerPolicy` and an access key
-- [ ] Decide deploy scope: Security + Auth only (~$3/mo) now, rest at M19, or full dev (~$75–90/mo)
-- [ ] After the first deploy: GitHub Environment `dev` variables `AWS_DEPLOY_ROLE_ARN`, `ALERT_EMAIL`; backup budget; budget action
+AWS (full list in `docs/aws-setup.md`):
+- [ ] Account verification for `basira-dev` (support case open; CloudShell in basira-dev blocked until done)
+- [x] 2026-10-27: `cdk bootstrap` (stack `CDKToolkit`, qualifier `hnb659fds`), run from Simurgh CloudShell
+- [x] IAM user `basira-deployer` with `BasiraDeployerPolicy`; decision: no access key until the Cicd stack (M19)
+- [x] Deploy scope decided and done: Security + Auth only (2026-10-27); the rest at M19
+- [ ] Real values for placeholder secrets `basira/dev/*` when providers are chosen
+- [ ] Backup budget in Simurgh for basira-dev (after first charges); budget action on Actual 100%
+- [ ] At M19, after the Cicd stack: GitHub Environment `dev` variables `AWS_DEPLOY_ROLE_ARN`, `ALERT_EMAIL`
 
 Repo housekeeping:
 - [x] Add `docs/handoff.md`
@@ -64,3 +68,5 @@ Build:
   `docs/spec.md`; research note imported into `docs/research/`. Project docs and artifacts are no longer mirrors.
 - 2026-11-01: Branch merged to `main`. Old claude.ai copies renamed "OUTDATED – …" with a banner
   pointing to the repo (artifacts have no folders); kept for now.
+- 2026-11-01: `docs/aws-setup.md` brought up to date with the 2026-10-27 bootstrap and Security + Auth
+  deploy from the old Cowork runbook. Decision recorded: no access key for `basira-deployer` until M19.
