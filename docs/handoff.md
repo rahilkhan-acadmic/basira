@@ -35,8 +35,10 @@ AWS:
 Repo housekeeping:
 - [x] Add `docs/handoff.md`
 - [x] Import the spec (v10) and research notes into `docs/`; add `docs/README.md`
-- [ ] Owner: retire the old copies outside the repo (spec artifact, Cowork project docs
-  `claude/handoff.md` and `claude/aws-setup-runbook.md`) or replace them with a pointer to `docs/`
+- [x] claude.ai artifacts marked outdated (title prefix "OUTDATED – " plus a banner linking here):
+  spec v10, order-book research doc, repo bundle. Kept, not deleted, by the Owner's choice.
+- [ ] Owner: mark the Cowork project docs `claude/handoff.md` and `claude/aws-setup-runbook.md` as
+  outdated (Claude Code cannot reach project docs)
 - [ ] Add `pythonpath = ["."]` to `[tool.pytest.ini_options]` so bare `pytest` works
 
 Build:
@@ -60,3 +62,5 @@ Build:
   (`fbd3f9f`). `claude/handoff.md` is a project doc, not in the repo; refresh it from this file.
 - 2026-11-01: All docs consolidated in the repo. Spec v10 imported from its claude.ai artifact into
   `docs/spec.md`; research note imported into `docs/research/`. Project docs and artifacts are no longer mirrors.
+- 2026-11-01: Branch merged to `main`. Old claude.ai copies renamed "OUTDATED – …" with a banner
+  pointing to the repo (artifacts have no folders); kept for now.
